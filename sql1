@@ -1,0 +1,76 @@
+departments(부서)
+dept_no	dept_name
+
+
+employee(고용자)
+emp_no	birth_date	First_name	Last_name	gender	Hire_date
+
+dept_manager (부서 관리자)
+dept_no	emp_no	from_date	To_date
+
+dept_emp(부서원)
+dept_no	emp_no	from_date	to_date
+
+salaries 월급
+emp_no	salary	from_date	to_date
+
+화살표는 외래키를 의미 
+(예: dept_emp 테이블의 dept_no 가  employee 테이블의 dept_no 의 외래키)
+아래 각 질의에 SQL 문을 적고 결과물을 출력하시오. 
+
+1.	부서원이 30000명이 넘는 dept_no와 dept_name을 나열하시오.
+
+SELECT dept_no, dept_name            //dept_no, dept_name 스키마
+FROM departments                     //departments table에서 가져옴
+WHERE dept_no IN (SELECT dept_no     //dept_no 중 IN(부속 질의문의 결과 값 중 일치하는 것이 있으면 검색 조건이 참)을 사용하여 부속질의 문을 만듬
+FROM dept_emp                        
+GROUP BY dept_no                     //GROUP BY 키워드를 이용해 특정 속성의 값이 같은 튜플을 모아 그룹을 만들고, 그룹별로 검색, GROUP BY 키워드와 함께 그룹을 나누는 기준이 되는 속성 지정
+HAVING  COUNT(*) >=30000);           //HAVING 키워드를 함께 이용해 그룹에 대한 조건을 작성 COUNT 가 30000 넘어가는것들 
+
++---------+-------------+
+| dept_no | dept_name   |
++---------+-------------+
+| d005    | Development |
+| d004    | Production  |
+| d007    | Sales       |
++---------+-------------+
+
+2.	“Finance” 부서의 관리자의 emp_no 와 First_name  last_name 을 조인질의와 exist 연산자를 이용하여 SQL 을 찾고 결과물을 적으시오.
+
+mysql> SELECT emp_no, First_name, last_name         //emp_no , First_name, last_name 스키마
+FROM employees                                      //employees table 로부터
+WHERE EXISTS (SELECT * FROM dept_manager            // 질의문에 최소 한개라도 존재하는지 (EXISTS)
+JOIN departments                                    //departments table을 dept_manager 테이블에 결합
+ON dept_manager.dept_no=departments.dept_no         //dept_no을 departments, dept_manager 결합
+WHERE dept_manager.emp_no = employees.emp_no        //dept_manager.emp_no 과 employees.emp_no 과 일치하며 departmernts.dept_name='Finance'인 것만 추려냄
+AND departments.dept_name='Finance');
++--------+------------+------------+
+| emp_no | First_name | last_name  |
++--------+------------+------------+
+| 110085 | Ebru       | Alpin      |
+| 110114 | Isamu      | Legleitner |
++--------+------------+------------+
+
+3.	“Research” 부서의 관리자의  First_name  last_name 과 월급(salary)과 월급의 시작 (from_date)과 끝 날짜 (to_date)를 구하시오.
+
+SELECT employees.first_name, employees.last_name, salaries.salary, salaries.from_date, salaries.to_date //동일한 컬럼을 정확하게 구분하기위해 테이블명 적음
+FROM dept_manager                                                                                       
+JOIN employees ON dept_manager.emp_no = employees.emp_no      //dept_manager에 employees의 emp.no이 같으면 조인
+JOIN salaries ON employees.emp_no = salaries.emp_no           //salaries를 조인하고 emp.no이 일치해야 조인을 함
+AND salaries.to_date = (                                      //salaries.to_date의 최대 값을 반환
+SELECT MAX(salaries.to_date)                       
+FROM salaries
+WHERE employees.emp_no = salaries.emp_no                      //이 조건을 만족하는 가장 큰 값 반환
+)
+WHERE dept_manager.dept_no = (                                //dept_manager.dept_no과 departments의 dept_name을 비교해 Research dept_no을 가져옴
+SELECT dept_no
+FROM departments
+WHERE dept_name = 'Research'
+);
+
++------------+-----------+--------+------------+------------+
+| first_name | last_name | salary | from_date  | to_date    |
++------------+-----------+--------+------------+------------+
+| Arie       | Staelin   | 103244 | 2001-12-28 | 9999-01-01 |
+| Hilary     | Kambil    |  79393 | 2002-01-27 | 9999-01-01 |
++------------+-----------+--------+------------+------------+
