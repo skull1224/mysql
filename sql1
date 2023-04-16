@@ -75,6 +75,63 @@ WHERE dept_name = 'Research'
 | Hilary     | Kambil    |  79393 | 2002-01-27 | 9999-01-01 |
 +------------+-----------+--------+------------+------------+
 
+4.
+SELECT gender, MAX(salary) as max_salary
+FROM salaries
+INNER JOIN employees ON salaries.emp_no = employees.emp_no
+WHERE YEAR(Hire_date) = 1999
+GROUP BY gender;
+
++--------+------------+
+| gender | max_salary |
++--------+------------+
+| M      |     114311 |
+| F      |     124516 |
++--------+------------+
+2 rows in set (0.06 sec)
+
+5.
+SELECT e.First_name, e.Last_name, d.dept_name 
+FROM employees AS e 
+LEFT JOIN dept_emp AS de ON e.emp_no = de.emp_no 
+LEFT JOIN departments AS d ON de.dept_no = d.dept_no 
+WHERE e.gender = 'M' AND de.dept_no = 'd005' AND de.from_date > '2002-06-05';
+
++-------------+---------------+-------------+
+| First_name  | Last_name     | dept_name   |
++-------------+---------------+-------------+
+| Shalesh     | Marzano       | Development |
+| Maja        | Shihab        | Development |
+| Kristin     | Radhakrishnan | Development |
+| Hsiangchu   | DuCasse       | Development |
+| Kiyomitsu   | Alpin         | Development |
+| Constantine | Reinhart      | Development |
+| Chaitali    | Rosaz         | Development |
+| Gill        | Baer          | Development |
+| Krisda      | Chepyzhov     | Development |
+| Mary        | Hammerschmidt | Development |
+| Flemming    | Rodiger       | Development |
+| Younwoo     | Decaestecker  | Development |
+| Tsutomu     | Angiulli      | Development |
+| Muneo       | Azuma         | Development |
+| Shir        | Imataki       | Development |
+| Demos       | Polupanov     | Development |
+| Shigehiro   | Rajala        | Development |
+| Kazuhira    | Wixon         | Development |
+| Piyush      | Docker        | Development |
+| Danai       | Setiz         | Development |
+| Ulises      | Muntz         | Development |
+| Douadi      | Schwaller     | Development |
+| Oguz        | Demke         | Development |
+| Debatosh    | Alvarado      | Development |
+| Moriyoshi   | Swick         | Development |
+| Krassimir   | Karunanithi   | Development |
+| Goa         | Aamodt        | Development |
+| Moheb       | Casperson     | Development |
+| Caolyn      | Luit          | Development |
+| Jouni       | Serna         | Development |
++-------------+---------------+-------------+
+
 
 3번 33개
 4번 2개
